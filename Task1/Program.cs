@@ -1,5 +1,6 @@
-﻿using System.Diagnostics;
-using System.Formats.Tar;
+﻿// Доработайте программу калькулятор реализовав выбор действий и вывод результатов на экран
+// в цикле так чтобы калькулятор мог работать до тех пор пока пользователь не нажмет отмена
+// или введёт пустую строку.
 using Task2;
 
 namespace Task1
@@ -14,7 +15,7 @@ namespace Task1
         static bool MyReadLine(out string input)
         {
             var key = Console.ReadKey();
-            if (key.Key == ConsoleKey.Escape)
+            if (key.Key == ConsoleKey.Escape || key.Key == ConsoleKey.Enter)
             {
                 // Присваиваем в input любой символ так как
                 // в противном случае один символ в финальном сообщении
@@ -26,7 +27,7 @@ namespace Task1
             return true;
         }
 
-        static void GreetingsInfo() 
+        static void GreetingsInfo()
         {
             Console.WriteLine("Добро пожаловать в приложение Простой Калькулятор!\n");
             Console.WriteLine("Правила использования калькулятора:\n");
@@ -38,38 +39,43 @@ namespace Task1
         static void Main(string[] args)
         {
             var calc = new Calculator();
-            string input;
-            bool isExit = false;
+            string input = "x";
+            bool isExit1 = false;
+            bool isExit2 = false;
 
             calc.GotResult += Calculator_GotResult!;
 
-            GreetingsInfo();            
+            GreetingsInfo();
 
-            while (true)
-            {                
-                Console.WriteLine("Введите два числа через пробел:");           
-                if (!MyReadLine(out input)) break;
+            while (!isExit1)
+            {
+                Console.WriteLine("Введите два числа через пробел:");
+                if (!MyReadLine(out input)) isExit1 = true;
 
-                if (input != null)
+                if (input != null && !isExit1)
                 {
                     int firstNum, secondNum;
 
-                    if(input.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length == 2)
+                    if (input.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length == 2)
                     {
                         var numbers = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
                         if (int.TryParse(numbers[0], out firstNum) && int.TryParse(numbers[1], out secondNum))
                         {
-                            while (!isExit)
+                            while (!isExit2 && !isExit1)
                             {
                                 Console.WriteLine("Введите операцию: +, -, *, /");
-                                if (!MyReadLine(out input)) break;
+                                if (!MyReadLine(out input))
+                                {
+                                    isExit1 = true;
+                                    isExit2 = true;
+                                }
+
                                 string operation = input;
 
-                                if ("+-*/".Contains(operation))
+                                if ("+-*/".Contains(operation) && !isExit1)
                                 {
-                                    isExit = true;
-
+                                    isExit2 = true;
                                     switch (operation)
                                     {
                                         case "+":
@@ -86,16 +92,17 @@ namespace Task1
                                             break;
                                     }
                                 }
+                                else if (isExit1) continue;
                                 else Console.WriteLine("Неверный формат ввода");
                             }
-                            isExit = false;
+                            isExit2 = false;
                         }
                         else Console.WriteLine("Неверный формат ввода");
                     }
                     else Console.WriteLine("Неверный формат ввода чисел");
                 }
             }
-            Console.WriteLine(input + "Спасибо, что воспользовались приложением!");
+            Console.WriteLine(input + "\nСпасибо, что воспользовались приложением!");
         }
     }
 }
